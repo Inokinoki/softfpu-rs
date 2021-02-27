@@ -8,7 +8,7 @@ pub struct F32 {
 }
 
 impl F32 {
-    pub fn new(value: u32) -> F32 {
+    pub fn from_u32(value: u32) -> F32 {
         F32 {
             value: value
         }
@@ -382,8 +382,8 @@ mod tests {
 
     #[test]
     fn test_f32_add_with_struct() {
-        let v0_1 = crate::soft_f32::F32::new(0x3DCCCCCD);
-        let v0_2 = crate::soft_f32::F32::new(0x3E4CCCCD);
+        let v0_1 = crate::soft_f32::F32::from_u32(0x3DCCCCCD);
+        let v0_2 = crate::soft_f32::F32::from_u32(0x3E4CCCCD);
 
         let v0_3 = v0_1 + v0_2;
 
