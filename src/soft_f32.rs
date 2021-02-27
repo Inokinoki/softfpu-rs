@@ -1,4 +1,34 @@
+use std::ops;
+
 use crate::soft_float::{ RoundingMode, DetectTininess };
+
+
+pub struct F32 {
+    value: u32,
+}
+
+impl F32 {
+    pub fn new(value: u32) -> F32 {
+        F32 {
+            value: value
+        }
+    }
+
+    pub fn value(self) -> u32 {
+        self.value
+    }
+}
+
+impl ops::Add<F32> for F32 {
+    type Output = F32;
+
+    fn add(self, other: F32) -> F32 {
+        F32 {
+            value: f32_add(self.value, other.value)
+        }
+    }
+}
+
 
 fn f32_shift_right_jam(a: i32, dist: i32) -> i32 {
     if dist < 31 {
@@ -348,5 +378,15 @@ mod tests {
     fn test_f32_add_tset_nan() {
         // FIXME: 0.1 + -0.2 = -0.1
         assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0xBE4CCCCD), 0xBDCCCCCD);
+    }
+
+    #[test]
+    fn test_f32_add_with_struct() {
+        let v0_1 = crate::soft_f32::F32::new(0x3DCCCCCD);
+        let v0_2 = crate::soft_f32::F32::new(0x3E4CCCCD);
+
+        let v0_3 = v0_1 + v0_2;
+
+        assert_eq!(v0_3.value(), 0x3E99999A);
     }
 }
