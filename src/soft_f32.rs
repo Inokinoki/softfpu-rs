@@ -375,7 +375,7 @@ mod tests {
     }
 
     #[test]
-    fn test_f32_add_tset_nan() {
+    fn test_f32_add_test_nan() {
         // FIXME: 0.1 + -0.2 = -0.1
         assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0xBE4CCCCD), 0xBDCCCCCD);
     }
