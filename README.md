@@ -9,8 +9,8 @@ It is in fact a by-product of one of my projects.
 
 ## TODOs
 
-- [x] Float32 Add (partially)
-- [ ] Float32 Substract
+- [x] Float32 Add
+- [x] Float32 Substract (partially)
 - [ ] Float32 Multiple
 - [ ] Float32 Divide
 - [ ] Float32 Log2
