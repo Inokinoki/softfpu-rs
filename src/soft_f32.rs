@@ -138,6 +138,55 @@ fn f32_round_and_pack(in_sign: i32, in_exp: i32, in_frac: i32) -> u32 {
     f32_pack_raw(sign, exp, frac)
 }
 
+fn f32_count_leading_zero(in_frac: i32) -> i32 {
+    let f32_count_leading_zeros_8: &[i32] = &[
+        8, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
+        3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    ];
+
+    let mut count = 0;
+    let mut frac = in_frac;
+    if frac < 0x10000 {
+        count = 16;
+        frac <<= 16;
+    }
+    if frac < 0x1000000 {
+        count += 8;
+        frac <<= 8;
+    }
+    count + f32_count_leading_zeros_8[(frac >> 24) as usize]
+}
+
+fn f32_norm_round_and_pack(in_sign: i32, in_exp: i32, in_frac: i32) -> u32 {
+    let shift_count = f32_count_leading_zero(in_frac) - 1;
+    let mut sign = in_sign;
+    let mut exp = in_exp - shift_count;
+    let mut frac = in_frac;
+
+    if exp < 0xFD && shift_count >= 7 {
+        if frac == 0 {
+            exp = 0;
+        }
+        return f32_pack_raw(sign, exp, frac << shift_count);
+    } else {
+        return f32_round_and_pack(sign, exp, frac << shift_count);
+    }
+}
+
 pub fn f32_add2(a: u32, b: u32) -> u32 {
     // Sign
     let mut a_sign = f32_sign(a);
@@ -217,11 +266,122 @@ pub fn f32_add2(a: u32, b: u32) -> u32 {
     f32_pack(r_sign, r_exp, r_frac)    // With no round
 }
 
+pub fn f32_sub(a: u32, b: u32) -> u32 {
+    // Sign
+    let mut a_sign = f32_sign(a);
+    let mut b_sign = f32_sign(b);
+    let mut r_sign = a_sign;
+
+    if a_sign == b_sign {
+        // Consider as addition
+        return f32_add(a, b);
+    }
+
+    // Exp
+    let mut a_exp = f32_exp(a);
+    let mut b_exp = f32_exp(b);
+    let mut r_exp = 0;
+
+    // Frac
+    let mut a_frac = f32_frac(a);
+    let mut b_frac = f32_frac(b);
+    let mut r_frac = 0;
+
+    let diff_exp = a_exp - b_exp;
+
+    a_frac <<= 7;
+    b_frac <<= 7;
+
+    if diff_exp == 0 {
+        if a_exp == 0xFF {
+            if (a_sign | b_sign) != 0 {
+                // TODO: propagate NaN
+            } else {
+                // Return a NaN
+                // FIXME: 0x7FC00000 is used in IBM IEEE, while 0xFFC00000 is used otherwise
+                return f32_pack_raw(0, 0xFF, 0);
+            }
+        }
+
+        if a_exp == 0 {
+            a_exp = 1;
+            b_exp = 1;
+        }
+
+        if a_frac > b_frac {
+            // Fraction of A is greater
+            r_exp = a_exp;
+            r_frac = a_frac - b_frac;
+        } else if b_frac > a_frac {
+            // Fraction of B is greater
+            r_sign ^= 1;
+            r_exp = b_exp;
+            r_frac = b_frac - a_frac;
+        } else {
+            // Same, will cause a 0
+            return f32_pack(0, 0, 0);
+        }
+        return f32_norm_round_and_pack(r_sign, r_exp - 1, r_frac);
+    } else if diff_exp > 0 {
+        // Exp of A is greater
+        if a_exp == 0xFF {
+            if a_frac != 0 {
+                // TODO: Propagate NaN
+            } else {
+                r_sign = a_sign;
+                r_exp = a_exp;
+                r_frac = a_frac;
+            }
+            return f32_pack_raw(r_sign, r_exp, r_frac);
+        }
+
+        if b_exp != 0 {
+            b_frac += 0x40000000;
+        } else {
+            b_frac += b_frac;
+        }
+
+        b_frac = f32_shift_right_jam(b_frac, diff_exp);
+
+        r_exp = a_exp;
+        r_frac = a_frac - b_frac;
+    } else {
+        // Exp of B is greater
+        if b_exp == 0xFF {
+            if b_frac != 0 {
+                // TODO: Propagate NaN
+            } else {
+                // Return a NaN
+                return f32_pack_raw(r_sign ^ 1, 0xFF, 0);
+            }
+        }
+
+        if a_exp != 0 {
+            a_frac += 0x40000000;
+        } else {
+            a_frac += a_frac;
+        }
+
+        a_frac = f32_shift_right_jam(a_frac, -diff_exp);
+        b_frac |= 0x40000000;
+
+        r_sign ^= 1;
+        r_exp = b_exp;
+        r_frac = b_frac - a_frac;
+    }
+    return f32_norm_round_and_pack(r_sign, r_exp - 1, r_frac);
+}
+
 pub fn f32_add(a: u32, b: u32) -> u32 {
     // Sign
     let mut a_sign = f32_sign(a);
     let mut b_sign = f32_sign(b);
     let mut r_sign;
+
+    if a_sign != b_sign {
+        // Consider as substraction
+        return f32_sub(a, b);
+    }
 
     // Exp
     let mut a_exp = f32_exp(a);
@@ -364,20 +524,20 @@ mod tests {
 
     #[test]
     fn test_f32_add_cross_first_neg() {
-        // FIXME: -0.1 + 0.2 = 0.1
+        // -0.1 + 0.2 = 0.1
         assert_eq!(crate::soft_f32::f32_add(0xBDCCCCCD, 0x3E4CCCCD), 0x3DCCCCCD);
     }
 
     #[test]
     fn test_f32_add_cross_second_neg() {
-        // FIXME: 0.1 + -0.2 = -0.1
+        // 0.1 + -0.2 = -0.1
         assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0xBE4CCCCD), 0xBDCCCCCD);
     }
 
     #[test]
     fn test_f32_add_test_nan() {
-        // FIXME: 0.1 + -0.2 = -0.1
-        assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0xBE4CCCCD), 0xBDCCCCCD);
+        // FIXME: add some examples, 0.1 + -0.2 = -0.1
+        assert_eq!(false);
     }
 
     #[test]
