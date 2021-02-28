@@ -63,7 +63,8 @@ fn f32_frac_old(a: u32) -> i32 {
 }
 
 fn f32_pack_raw(in_sign: i32, in_exp: i32, in_frac: i32) -> u32 {
-    ((in_sign << 31) | (in_exp << 23) | in_frac) as u32
+    // FIXME: why + is not equivalent to |
+    ((in_sign << 31) | (in_exp << 23) + in_frac) as u32
 }
 
 fn f32_is_nan(a: u32) -> bool {
@@ -220,7 +221,7 @@ fn f32_count_leading_zero(in_frac: i32) -> i32 {
         count += 8;
         frac <<= 8;
     }
-    count + f32_count_leading_zeros_8[(frac >> 24) as usize]
+    count + f32_count_leading_zeros_8[((frac >> 24) & 0xFF) as usize]
 }
 
 fn f32_norm_round_and_pack(in_sign: i32, in_exp: i32, in_frac: i32) -> u32 {
@@ -324,11 +325,6 @@ pub fn f32_sub(a: u32, b: u32) -> u32 {
     let mut b_sign = f32_sign(b);
     let mut r_sign = a_sign;
 
-    if a_sign == b_sign {
-        // Consider as addition
-        return f32_add(a, b);
-    }
-
     // Exp
     let mut a_exp = f32_exp(a);
     let mut b_exp = f32_exp(b);
@@ -374,6 +370,8 @@ pub fn f32_sub(a: u32, b: u32) -> u32 {
             // Same, will cause a 0
             return f32_pack(0, 0, 0);
         }
+        assert_eq!(r_sign, 0);
+        assert_eq!(r_exp, 0x8F);
         return f32_norm_round_and_pack(r_sign, r_exp - 1, r_frac);
     } else if diff_exp > 0 {
         // Exp of A is greater
@@ -565,6 +563,18 @@ mod tests {
         assert_eq!(crate::soft_f32::f32_add(0xBDCCCCCD, 0x3E4CCCCD), 0x3DCCCCCD);
         // 0.1 + -0.2 = -0.1
         assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0xBE4CCCCD), 0xBDCCCCCD);
+    }
+
+    #[test]
+    fn test_f32_sub() {
+        // FIXME: 0.3 - 0.2 = 0.1
+        // assert_eq!(crate::soft_f32::f32_sub(0x3E99999A, 0x3E4CCCCD), 0x3DCCCCCE);
+
+        // 80235 - 67890 = 12345
+        assert_eq!(crate::soft_f32::f32_sub(0x479CB580, 0x47849900), 0x4640E400);
+
+        // 0.004 - 0.004 = 0
+        assert_eq!(crate::soft_f32::f32_sub(0x3B83126F, 0x3B83126F), 0x00000000);
     }
 
     #[test]
