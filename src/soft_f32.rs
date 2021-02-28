@@ -510,9 +510,24 @@ mod tests {
     }
 
     #[test]
-    fn test_f32_add_test_nan() {
-        // FIXME: add some examples, 0.1 + -0.2 = -0.1
-        assert_eq!(false, true);
+    fn test_f32_add_inf_nan() {
+        // Inf + 1 = Inf
+        assert_eq!(crate::soft_f32::f32_add(0x7F800000, 0x3F800000), 0x7F800000);
+
+        // -Inf + 1 = -Inf
+        assert_eq!(crate::soft_f32::f32_add(0xFF800000, 0x3F800000), 0xFF800000);
+
+        // FIXME: -Inf + Inf = NaN
+        assert_eq!(crate::soft_f32::f32_add(0xFF800000, 0x7F800000), 0xFFFFFFFF);
+
+        // FIXME: NaN + 1 = NaN
+        assert_eq!(crate::soft_f32::f32_add(0xFFFFFFFF, 0x3F800000), 0xFFFFFFFF);
+
+        // FIXME: NaN + Inf = NaN
+        assert_eq!(crate::soft_f32::f32_add(0xFFFFFFFF, 0x7F800000), 0xFFFFFFFF);
+
+        // FIXME: NaN + -Inf = NaN
+        assert_eq!(crate::soft_f32::f32_add(0xFFFFFFFF, 0xFF800000), 0xFFFFFFFF);
     }
 
     #[test]
