@@ -21,7 +21,7 @@ and a procedule-style API:
 let v0_1 = 0x3DCCCCCD;  // 0.1
 let v0_2 = 0x3E4CCCCD;  // 0.2
 
-let v0_3 = soft_f32::f32_add(v0_1 + v0_2); // 0.1 + 0.2
+let v0_3 = soft_f32::f32_add(v0_1, v0_2); // 0.1 + 0.2
 
 assert_eq!(v0_3, 0x3E99999A);
 ```
@@ -36,6 +36,7 @@ Currently only aiming at implementing Float32.
 - [x] Float32 Substract
 - [ ] Float32 Multiple
 - [ ] Float32 Divide
+- [ ] Float32 Compare + Equal + Not Equal
 - [ ] Float32 Log2
 - [ ] Float32 Sqrt
 - [ ] Float32 Exp
