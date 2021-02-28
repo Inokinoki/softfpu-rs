@@ -571,6 +571,9 @@ mod tests {
         // 0.3 - 0.2 = 0.1
         assert_eq!(crate::soft_f32::f32_sub(0x3E99999A, 0x3E4CCCCD), 0x3DCCCCCE);
 
+        // 0.2 - 0.3 = -0.1
+        assert_eq!(crate::soft_f32::f32_sub(0x3E4CCCCD, 0x3E99999A), 0xBDCCCCCE);
+
         // 80235 - 67890 = 12345
         assert_eq!(crate::soft_f32::f32_sub(0x479CB580, 0x47849900), 0x4640E400);
 
