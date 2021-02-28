@@ -29,6 +29,15 @@ impl ops::Add<F32> for F32 {
     }
 }
 
+impl ops::Sub<F32> for F32 {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        F32 {
+            value: f32_sub(self.value, other.value)
+        }
+    }
+}
 
 fn f32_shift_right_jam(a: i32, dist: i32) -> i32 {
     if dist < 31 {
@@ -619,5 +628,15 @@ mod tests {
         let v0_3 = v0_1 + v0_2;
 
         assert_eq!(v0_3.value(), 0x3E99999A);
+    }
+
+    #[test]
+    fn test_f32_sub_with_struct() {
+        let v0_1 = crate::soft_f32::F32::from_u32(0x3DCCCCCD);
+        let v0_2 = crate::soft_f32::F32::from_u32(0x3E4CCCCD);
+
+        let v0_1_result = v0_2 - v0_1;
+
+        assert_eq!(v0_1_result.value(), 0x3DCCCCCD);
     }
 }
