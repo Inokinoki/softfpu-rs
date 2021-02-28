@@ -394,6 +394,7 @@ pub fn f32_sub(a: u32, b: u32) -> u32 {
         }
 
         b_frac = f32_shift_right_jam(b_frac, diff_exp);
+        a_frac |= 0x40000000;   // Add the implicit 1
 
         r_exp = a_exp;
         r_frac = a_frac - b_frac;
@@ -567,8 +568,8 @@ mod tests {
 
     #[test]
     fn test_f32_sub() {
-        // FIXME: 0.3 - 0.2 = 0.1
-        // assert_eq!(crate::soft_f32::f32_sub(0x3E99999A, 0x3E4CCCCD), 0x3DCCCCCE);
+        // 0.3 - 0.2 = 0.1
+        assert_eq!(crate::soft_f32::f32_sub(0x3E99999A, 0x3E4CCCCD), 0x3DCCCCCE);
 
         // 80235 - 67890 = 12345
         assert_eq!(crate::soft_f32::f32_sub(0x479CB580, 0x47849900), 0x4640E400);
