@@ -487,49 +487,24 @@ pub fn f32_add(a: u32, b: u32) -> u32 {
 #[cfg(test)]
 mod tests {
     #[test]
-    fn test_f32_add_exp1_pos() {
+    fn test_f32_add() {
         // 0.1 + 0.2 = 0.3
         assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0x3E4CCCCD), 0x3E99999A);
-    }
-
-    #[test]
-    fn test_f32_add_exp1_neg() {
-        // 0.1 + -0.2 = -0.3
+        // -0.1 + -0.2 = -0.3
         assert_eq!(crate::soft_f32::f32_add(0xBDCCCCCD, 0xBE4CCCCD), 0xBE99999A);
-    }
 
-    #[test]
-    fn test_f32_add_normal_pos() {
         // 12345 + 67890 = 80235
         assert_eq!(crate::soft_f32::f32_add(0x4640E400, 0x47849900), 0x479CB580);
-    }
-
-    #[test]
-    fn test_f32_add_normal_neg() {
         // -12345 + -67890 = -80235
         assert_eq!(crate::soft_f32::f32_add(0xC640E400, 0xC7849900), 0xC79CB580);
-    }
 
-    #[test]
-    fn test_f32_add_same_exp_pos() {
         // 0.002 + 0.002 = 0.004
         assert_eq!(crate::soft_f32::f32_add(0x3B03126F, 0x3B03126F), 0x3B83126F);
-    }
-
-    #[test]
-    fn test_f32_add_same_exp_neg() {
         // -0.002 + -0.002 = -0.004
         assert_eq!(crate::soft_f32::f32_add(0xBB03126F, 0xBB03126F), 0xBB83126F);
-    }
 
-    #[test]
-    fn test_f32_add_cross_first_neg() {
         // -0.1 + 0.2 = 0.1
         assert_eq!(crate::soft_f32::f32_add(0xBDCCCCCD, 0x3E4CCCCD), 0x3DCCCCCD);
-    }
-
-    #[test]
-    fn test_f32_add_cross_second_neg() {
         // 0.1 + -0.2 = -0.1
         assert_eq!(crate::soft_f32::f32_add(0x3DCCCCCD, 0xBE4CCCCD), 0xBDCCCCCD);
     }
@@ -537,7 +512,7 @@ mod tests {
     #[test]
     fn test_f32_add_test_nan() {
         // FIXME: add some examples, 0.1 + -0.2 = -0.1
-        assert_eq!(false);
+        assert_eq!(false, true);
     }
 
     #[test]
