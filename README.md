@@ -45,6 +45,7 @@ Currently only aiming at implementing Float32.
 - [ ] Float32 Log2
 - [ ] Float32 Sqrt
 - [ ] Float32 Exp
+- [ ] Float32 Sin, Cos
 
 # Conclusion
 
