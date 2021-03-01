@@ -1,11 +1,20 @@
 
 mod soft_f32_add;
 mod soft_f32_sub;
+mod soft_f32_comp;
 mod util;
 
 // Operations
 use soft_f32_add::f32_add;
 use soft_f32_sub::f32_sub;
+
+// Comparisons
+use soft_f32_comp::f32_eq;
+use soft_f32_comp::f32_ne;
+use soft_f32_comp::f32_lt;
+use soft_f32_comp::f32_gt;
+use soft_f32_comp::f32_le;
+use soft_f32_comp::f32_ge;
 
 // Utilities
 pub use util::{
