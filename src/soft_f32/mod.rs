@@ -60,6 +60,52 @@ impl ops::Sub<F32> for F32 {
     }
 }
 
+use std::cmp;
+
+impl cmp::PartialEq for F32 {
+    // Implement equal with only symmetric and transitive for F32.
+    //
+    // Ref: https://doc.rust-lang.org/std/cmp/trait.PartialEq.html
+    // For example, in floating point numbers NaN != NaN,
+    // so floating point types implement PartialEq but not Eq.
+    fn eq(&self, other: &Self) -> bool {
+        f32_eq(self.value, other.value)
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        f32_ne(self.value, other.value)
+    }
+}
+
+impl cmp::PartialOrd for F32 {
+    // Implement compare with only symmetric and transitive for F32.
+    //
+    // Ref: https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
+    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+        if f32_eq(self.value, other.value) { return Some(cmp::Ordering::Equal); }
+        if f32_lt(self.value, other.value) { return Some(cmp::Ordering::Less); }
+        if f32_gt(self.value, other.value) { return Some(cmp::Ordering::Greater); }
+
+        None
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        f32_gt(self.value, other.value)
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+        f32_lt(self.value, other.value)
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        f32_ge(self.value, other.value)
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        f32_le(self.value, other.value)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -80,5 +126,24 @@ mod tests {
         let v0_1_result = v0_2 - v0_1;
 
         assert_eq!(v0_1_result.value(), 0x3DCCCCCD);
+    }
+
+    #[test]
+    fn test_f32_compare_with_struct() {
+        let v0_1 = crate::soft_f32::F32::from_u32(0x3DCCCCCD);
+        let v0_2 = crate::soft_f32::F32::from_u32(0x3E4CCCCD);
+
+        assert_eq!(v0_1 == v0_2, false);
+        assert_eq!(v0_1 != v0_2, true);
+
+        assert_eq!(v0_1 < v0_2, true);
+        assert_eq!(v0_1 <= v0_2, true);
+        assert_eq!(v0_1 < v0_1, false);
+        assert_eq!(v0_1 <= v0_1, true);
+
+        assert_eq!(v0_1 > v0_2, false);
+        assert_eq!(v0_1 >= v0_2, false);
+        assert_eq!(v0_1 > v0_1, false);
+        assert_eq!(v0_1 >= v0_1, true);
     }
 }
