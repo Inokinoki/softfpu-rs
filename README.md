@@ -20,7 +20,7 @@ assert_eq!(v0_1 < v0_1, false);
 assert_eq!(v0_1 <= v0_1, true);
 ```
 
-and a procedule-style API:
+and a procedure-style API:
 
 ```rust
 let v0_1 = 0x3DCCCCCD;  // 0.1
@@ -49,4 +49,4 @@ Currently only aiming at implementing Float32.
 
 # Conclusion
 
-It is in fact a by-product of one of my projects, to bring a float number subsystem into a PL which is not capable to handle float numbers. And finally implement a more complex system.
+It is a by-product of one of my projects to bring a float number subsystem into a PL that is not capable of handling float numbers. And finally, implement a more complex system.
