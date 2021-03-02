@@ -226,3 +226,33 @@ pub(crate) fn f32_short_shift_right_jam64(a: u64, count: i32) -> i32 {
     }
     b
 }
+
+pub(crate) fn f32_approx_recip(a: u32) -> u32 {
+    let k0s: &[u64] = &[
+        0xFFC4, 0xF0BE, 0xE363, 0xD76F, 0xCCAD, 0xC2F0, 0xBA16, 0xB201,
+        0xAA97, 0xA3C6, 0x9D7A, 0x97A6, 0x923C, 0x8D32, 0x887E, 0x8417,
+    ];
+
+    let k1s: &[u64] = &[
+        0xF0F1, 0xD62C, 0xBFA1, 0xAC77, 0x9C0A, 0x8DDB, 0x8185, 0x76BA,
+        0x6D3B, 0x64D4, 0x5D5C, 0x56B1, 0x50B6, 0x4B55, 0x4679, 0x4211,
+    ];
+
+    let a_u64 = a as u64;
+
+    let index = ((a >> 27) & 0x0F) as usize;
+
+    let eps = (a >> 11) as u64;
+
+    let r0: u64 = k0s[index] - ((k1s[index] * eps) >> 20);
+    
+    let delta0: u32 = ((r0 * a_u64) >> 7) as u32;
+
+    let r: u64  = (r0 << 16) + ((r0 * delta0 as u64) >> 24);
+
+    let sqr_delta0 = (delta0 as u64 * delta0 as u64) >> 32;
+
+    let result = (r + (r * sqr_delta0) >> 48) as u32;
+
+    result
+}

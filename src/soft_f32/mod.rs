@@ -2,6 +2,7 @@
 mod soft_f32_add;
 mod soft_f32_sub;
 mod soft_f32_mul;
+mod soft_f32_div;
 mod soft_f32_comp;
 mod util;
 
@@ -9,6 +10,7 @@ mod util;
 use soft_f32_add::f32_add;
 use soft_f32_sub::f32_sub;
 use soft_f32_mul::f32_mul;
+use soft_f32_div::f32_div;
 
 // Comparisons
 use soft_f32_comp::f32_eq;
