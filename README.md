@@ -39,7 +39,7 @@ Currently only aiming at implementing Float32.
 
 - [x] Float32 Add
 - [x] Float32 Substract
-- [ ] Float32 Multiple
+- [x] Float32 Multiple (partially, some Infinity-releated tests fail)
 - [ ] Float32 Divide
 - [x] Float32 Compare + Equal + Not Equal
 - [ ] Float32 Log2
