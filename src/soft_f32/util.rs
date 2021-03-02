@@ -210,3 +210,19 @@ pub(crate) fn f32_norm_round_and_pack(in_sign: i32, in_exp: i32, in_frac: i32) -
         return f32_round_and_pack(sign, exp, frac << shift_count);
     }
 }
+
+pub(crate) fn f32_norm_subnormal_frac(frac: i32) -> (i32, i32) {
+    let shift_count = f32_count_leading_zero(frac) - 8;
+
+    (1 - shift_count, frac << shift_count)
+}
+
+use std::convert::TryFrom;
+
+pub(crate) fn f32_short_shift_right_jam64(a: u64, count: i32) -> i32 {
+    let b: i32 = i32::try_from((a >> count) & 0xFFFFFFFF).unwrap();
+    if (a & ((0x01 << count) - 1)) != 0 {
+        return b | 1;
+    }
+    b
+}
