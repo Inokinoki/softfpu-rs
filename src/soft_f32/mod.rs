@@ -62,6 +62,16 @@ impl ops::Sub<F32> for F32 {
     }
 }
 
+impl ops::Mul<F32> for F32 {
+    type Output = Self;
+
+    fn mul(self, other: Self) -> Self {
+        F32 {
+            value: crate::soft_f32::soft_f32_mul::f32_mul(self.value, other.value)
+        }
+    }
+}
+
 use std::cmp;
 
 impl cmp::PartialEq for F32 {
@@ -128,6 +138,16 @@ mod tests {
         let v0_1_result = v0_2 - v0_1;
 
         assert_eq!(v0_1_result.value(), 0x3DCCCCCD);
+    }
+
+    #[test]
+    fn test_f32_mul_with_struct() {
+        let v0_1 = crate::soft_f32::F32::from_u32(0x3DCCCCCD);
+        let v0_2 = crate::soft_f32::F32::from_u32(0x3E4CCCCD);
+
+        let v0_02 = v0_2 * v0_1;
+
+        assert_eq!(v0_02.value(), 0x3CA3D70B);
     }
 
     #[test]
