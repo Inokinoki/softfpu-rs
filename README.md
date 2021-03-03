@@ -43,7 +43,7 @@ Currently only aiming at implementing Float32.
 - [x] Float32 Divide (partially, some Infinity-releated tests fail)
 - [x] Float32 Compare + Equal + Not Equal
 - [ ] Float32 Log2
-- [ ] Float32 Sqrt
+- [x] Float32 Sqrt (partially, some tests fail)
 - [ ] Float32 Exp
 - [ ] Float32 Sin, Cos
 

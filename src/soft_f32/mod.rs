@@ -44,6 +44,12 @@ impl F32 {
     pub fn value(self) -> u32 {
         self.value
     }
+
+    pub fn sqrt(self) -> Self {
+        F32 {
+            value: f32_sqrt(self.value)
+        }
+    }
 }
 
 use std::ops;
