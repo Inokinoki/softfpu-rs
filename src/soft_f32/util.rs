@@ -256,3 +256,38 @@ pub(crate) fn f32_approx_recip(a: u32) -> u32 {
 
     result
 }
+
+pub(crate) fn f32_approx_recip_sqrt(odd_exp: u32, a: u32) -> u32 {
+    let k0s: &[u16] = &[
+        0xB4C9, 0xFFAB, 0xAA7D, 0xF11C, 0xA1C5, 0xE4C7, 0x9A43, 0xDA29,
+        0x93B5, 0xD0E5, 0x8DED, 0xC8B7, 0x88C6, 0xC16D, 0x8424, 0xBAE1,
+    ];
+
+    let k1s: &[u16] = &[
+        0xA5A5, 0xEA42, 0x8C21, 0xC62D, 0x788F, 0xAA7F, 0x6928, 0x94B6,
+        0x5CC7, 0x8335, 0x52A6, 0x74E2, 0x4A3E, 0x68FE, 0x432B, 0x5EFD,
+    ];
+
+    let index = (((a >> 27) & 0x0E) + odd_exp) as usize;
+    let eps = a >> 12;
+    let r0: u16 = (k0s[index] - (((k1s[index] as u64 * eps as u64) >> 20) & 0xFFFF) as u16);
+    let mut e_sqr_r0: u32 = r0 as u32 * r0 as u32;
+
+    if odd_exp == 0 {
+        e_sqr_r0 <<= 1;
+    }
+
+    let delta0 = !(((e_sqr_r0 as u64 * a as u64)>>23) as u32);
+
+    let mut r: u32 = ((r0 as u32) << 16) + (((r0 as u64) * delta0 as u64) >> 25) as u32;
+
+    let sqr_delta0 = ((delta0 as u64) * (delta0 as u64)) >> 32;
+
+    r += (((r0 as u32) >> 1) + ((r0 as u32) >> 3) - ((((r0 as u64) << 14) * (sqr_delta0 as u64)) >> 48) as u32 );
+
+    if r & 0x80000000 == 0 {
+        r = 0x80000000;
+    }
+
+    r
+}

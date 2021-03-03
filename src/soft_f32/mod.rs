@@ -4,6 +4,7 @@ mod soft_f32_sub;
 mod soft_f32_mul;
 mod soft_f32_div;
 mod soft_f32_comp;
+mod soft_f32_sqrt;
 mod util;
 
 // Operations
@@ -19,6 +20,9 @@ use soft_f32_comp::f32_lt;
 use soft_f32_comp::f32_gt;
 use soft_f32_comp::f32_le;
 use soft_f32_comp::f32_ge;
+
+// Others
+use soft_f32_sqrt::f32_sqrt;
 
 // Utilities
 pub use util::{
