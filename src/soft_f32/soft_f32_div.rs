@@ -76,35 +76,23 @@ pub fn f32_div(a: u32, b: u32) -> u32 {
     a_frac |= 0x00800000;
     b_frac |= 0x00800000;
 
+    // Use u64 to divide u32
+    let mut a_frac_u64 = a_frac as u64;
     if a_frac < b_frac {
         r_exp -= 1;
-        a_frac <<= 8;
+        a_frac_u64 <<= 31;
     } else {
-        a_frac <<= 7;
+        a_frac_u64 <<= 30;
     }
-    b_frac <<= 8;
+    let mut r_frac_u64 = a_frac_u64 / (b_frac as u64);
 
-    let a_frac_u64 = a_frac as u64;
-    let b_frac_u32 = b_frac as u32;
-    let r_frac_u64 = (a_frac_u64 * f32_approx_recip(b_frac_u32) as u64) >> 32;
-    r_frac = r_frac_u64 as i32;
-
-    r_frac += 2;
-
-    if (r_frac & 0x3F) < 2 {
-        r_frac &= (!3);
-
-        let r_frac_u64 = r_frac as u64;
-        let rem = (a_frac_u64 << 31) - (r_frac_u64 << 1) * b_frac_u32 as u64;
-
-        if rem & 0x8000000000000000 != 0 {
-            r_frac -= 4;
-        } else {
-            if rem != 0 {
-                r_frac |= 1;
-            }
+    if (r_frac_u64 & 0x3F) == 0 {
+        if r_frac_u64 * (b_frac as u64) != a_frac_u64 {
+            r_frac_u64 = r_frac_u64 | 0x01;
         }
     }
+
+    r_frac = (r_frac_u64 & 0xFFFFFFFF) as i32;
 
     f32_round_and_pack(r_sign, r_exp, r_frac)
 }
@@ -113,26 +101,20 @@ pub fn f32_div(a: u32, b: u32) -> u32 {
 mod tests {
     #[test]
     fn test_f32_div() {
-        // FIXME: 0.1 / 0.2 = 0.5
-        // 0x3E800002
-        // assert_eq!(crate::soft_f32::f32_div(0x3DCCCCCD, 0x3E4CCCCD), 0x3F000000);
-        // FIXME: -0.1 / -0.2 = 0.5
-        // 0x3E800002
-        // assert_eq!(crate::soft_f32::f32_div(0xBDCCCCCD, 0xBE4CCCCD), 0x3F000000);
+        // 0.1 / 0.2 = 0.5
+        assert_eq!(crate::soft_f32::f32_div(0x3DCCCCCD, 0x3E4CCCCD), 0x3F000000);
+        // -0.1 / -0.2 = 0.5
+        assert_eq!(crate::soft_f32::f32_div(0xBDCCCCCD, 0xBE4CCCCD), 0x3F000000);
 
-        // FIXME: 12345 / 67890 = 8.381021E8
-        // 0x3D800001
-        // assert_eq!(crate::soft_f32::f32_div(0x4640E400, 0x47849900), 0x3E3A33D0);
-        // FIXME: -12345 / -67890 = 8.381021E8
-        // 0x3D800001
-        // assert_eq!(crate::soft_f32::f32_div(0xC640E400, 0xC7849900), 0x3E3A33D0);
+        // 12345 / 67890 = 8.381021E8
+        assert_eq!(crate::soft_f32::f32_div(0x4640E400, 0x47849900), 0x3E3A33D0);
+        // -12345 / -67890 = 8.381021E8
+        assert_eq!(crate::soft_f32::f32_div(0xC640E400, 0xC7849900), 0x3E3A33D0);
 
-        // FIXME: -0.1 / 0.2 = -0.5
-        // 0xBE800002
-        // assert_eq!(crate::soft_f32::f32_div(0xBDCCCCCD, 0x3E4CCCCD), 0xBF000000);
-        // FIXME: 0.1 / -0.2 = -0.5
-        // 0xBE800002
-        // assert_eq!(crate::soft_f32::f32_div(0x3DCCCCCD, 0xBE4CCCCD), 0xBF000000);
+        // -0.1 / 0.2 = -0.5
+        assert_eq!(crate::soft_f32::f32_div(0xBDCCCCCD, 0x3E4CCCCD), 0xBF000000);
+        // 0.1 / -0.2 = -0.5
+        assert_eq!(crate::soft_f32::f32_div(0x3DCCCCCD, 0xBE4CCCCD), 0xBF000000);
     }
 
     #[test]
