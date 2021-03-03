@@ -40,7 +40,7 @@ Currently only aiming at implementing Float32.
 - [x] Float32 Add
 - [x] Float32 Substract
 - [x] Float32 Multiple (partially, some Infinity-releated tests fail)
-- [ ] Float32 Divide
+- [x] Float32 Divide (partially, some Infinity-releated tests fail)
 - [x] Float32 Compare + Equal + Not Equal
 - [ ] Float32 Log2
 - [ ] Float32 Sqrt
