@@ -1,6 +1,6 @@
 [package]
 name = "softfpu-rs"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Inoki <veyx.shaw@gmail.com>"]
 edition = "2018"
 
