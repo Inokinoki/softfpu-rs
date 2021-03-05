@@ -269,7 +269,7 @@ pub(crate) fn f32_approx_recip_sqrt(odd_exp: u32, a: u32) -> u32 {
     ];
 
     let index = (((a >> 27) & 0x0E) + odd_exp) as usize;
-    let eps = a >> 12;
+    let eps = (a >> 12) & 0x0000FFFF;   // Only use the low 16 bits
     let r0: u16 = (k0s[index] - (((k1s[index] as u64 * eps as u64) >> 20) & 0xFFFF) as u16);
     let mut e_sqr_r0: u32 = r0 as u32 * r0 as u32;
 
@@ -281,9 +281,11 @@ pub(crate) fn f32_approx_recip_sqrt(odd_exp: u32, a: u32) -> u32 {
 
     let mut r: u32 = ((r0 as u32) << 16) + (((r0 as u64) * delta0 as u64) >> 25) as u32;
 
-    let sqr_delta0 = ((delta0 as u64) * (delta0 as u64)) >> 32;
+    let sqr_delta0 = (((delta0 as u64) * (delta0 as u64)) >> 32) & 0xFFFFFFFF;
 
-    r += (((r0 as u32) >> 1) + ((r0 as u32) >> 3) - ((((r0 as u64) << 14) * (sqr_delta0 as u64)) >> 48) as u32 );
+    let r_temp_left_u64 = ((r >> 1) as u64) + ((r >> 3) as u64) - ((r0 as u64) << 14);
+    let r_temp: u64 = (r_temp_left_u64 * (sqr_delta0 as u64));
+    r += ((r_temp >> 48) & 0xFFFFFFFF) as u32;
 
     if r & 0x80000000 == 0 {
         r = 0x80000000;
