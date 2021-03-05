@@ -42,10 +42,10 @@ Currently only aiming at implementing Float32.
 - [x] Float32 Multiple
 - [x] Float32 Divide
 - [x] Float32 Compare + Equal + Not Equal
-- [ ] Float32 Log2
+- [ ] Float32 Log2 (v0.2.X)
 - [x] Float32 Sqrt (partially, some tests fail)
-- [ ] Float32 Exp
-- [ ] Float32 Sin, Cos
+- [ ] Float32 Exp (v0.2.X)
+- [ ] Float32 Sin, Cos (v0.2.X)
 
 # Conclusion
 
