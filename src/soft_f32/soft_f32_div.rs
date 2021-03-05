@@ -28,17 +28,19 @@ pub fn f32_div(a: u32, b: u32) -> u32 {
     let mut r_frac;
 
     if a_exp == 0xFF {
-        if a_sign != 0 {
+        if a_frac != 0 {
             return f32_propagate_nan(a, b);
         }
         if b_exp == 0xFF {
-            if b_sign != 0 {
+            if b_frac != 0 {
                 return f32_propagate_nan(a, b);
             } else {
                 // Invalid
                 return f32_pack_raw(r_sign, 0xFF, 0);
             }
         }
+        // INFINITY
+        return f32_pack_raw(r_sign, 0xFF, 0);
     }
     if b_exp == 0xFF {
         if b_frac != 0 {
@@ -48,13 +50,13 @@ pub fn f32_div(a: u32, b: u32) -> u32 {
     }
 
     if b_exp == 0 {
-        if b_sign == 0 {
+        if b_frac == 0 {
             if (a_exp | a_frac) == 0 {
                 // Invalid, return default NaN
                 return f32_pack_raw(r_sign, 0xFF, 0);
             }
-            // Zero
-            return f32_pack_raw(r_sign, 0, 0);
+            // Infinity
+            return f32_pack_raw(r_sign, 0xFF, 0);
         }
 
         let (exp, frac) = f32_norm_subnormal_frac(b_frac);
@@ -119,40 +121,38 @@ mod tests {
 
     #[test]
     fn test_f32_div_inf_nan() {
-        // FIXME: 1 / 0 = Inf
-        // 0
-        // assert_eq!(crate::soft_f32::f32_div(0x3F800000, 0x00000000), 0x7F800000);
+        // 1 / 0 = Inf
+        assert_eq!(crate::soft_f32::f32_div(0x3F800000, 0x00000000), 0x7F800000);
 
-        // FIXME: 1 / -0 = -Inf
-        // 0xB3800005
-        // assert_eq!(crate::soft_f32::f32_div(0x3F800000, 0x80000000), 0xFF800000);
+        //  1 / -0 = -Inf
+        assert_eq!(crate::soft_f32::f32_div(0x3F800000, 0x80000000), 0xFF800000);
 
         // Inf / 1 = Inf
-        //assert_eq!(crate::soft_f32::f32_div(0x7F800000, 0x3F800000), 0x7F800000);
+        assert_eq!(crate::soft_f32::f32_div(0x7F800000, 0x3F800000), 0x7F800000);
 
         // -Inf / 1 = -Inf
-        // assert_eq!(crate::soft_f32::f32_div(0xFF800000, 0x3F800000), 0xFF800000);
+        assert_eq!(crate::soft_f32::f32_div(0xFF800000, 0x3F800000), 0xFF800000);
 
         // -Inf / Inf = -Inf
-        // assert_eq!(crate::soft_f32::f32_div(0xFF800000, 0x7F800000), 0xFF800000);
+        assert_eq!(crate::soft_f32::f32_div(0xFF800000, 0x7F800000), 0xFF800000);
 
-        // Inf x -1 = -Inf
-        //assert_eq!(crate::soft_f32::f32_div(0x7F800000, 0xBF800000), 0xFF800000);
+        // Inf / -1 = -Inf
+        assert_eq!(crate::soft_f32::f32_div(0x7F800000, 0xBF800000), 0xFF800000);
 
         // -Inf / -1 = -Inf
-        // assert_eq!(crate::soft_f32::f32_div(0xFF800000, 0xBF800000), 0x7F800000);
+        assert_eq!(crate::soft_f32::f32_div(0xFF800000, 0xBF800000), 0x7F800000);
 
         // NaN / 1 = NaN
-        // assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0x3F800000)), true);
+        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0x3F800000)), true);
 
         // NaN / -1 = NaN
-        // assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0x3F800000)), true);
+        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0x3F800000)), true);
 
         // NaN / Inf = NaN
-        // assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0x7F800000)), true);
+        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0x7F800000)), true);
 
         // NaN / -Inf = NaN
-        // assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0xFF800000)), true);
+        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_div(0xFFFFFFFF, 0xFF800000)), true);
     }
 }
 
