@@ -29,7 +29,7 @@ pub fn f32_mul(a: u32, b: u32) -> u32 {
 
     if a_exp == 0xFF {
         // NaN
-        if a_sign != 0 || (b_exp == 0xFF && b_sign != 0) {
+        if a_frac != 0 || (b_exp == 0xFF && b_frac != 0) {
             return f32_propagate_nan(a, b);
         }
 
@@ -43,7 +43,7 @@ pub fn f32_mul(a: u32, b: u32) -> u32 {
     }
     if b_exp == 0xFF {
         // Nan
-        if b_sign != 0 {
+        if b_frac != 0 {
             return f32_propagate_nan(a, b);
         }
 
@@ -122,20 +122,17 @@ mod tests {
         // Inf x 1 = Inf
         assert_eq!(crate::soft_f32::f32_mul(0x7F800000, 0x3F800000), 0x7F800000);
 
-        // FIXME: -Inf x 1 = -Inf
-        // 3FC00000
-        // assert_eq!(crate::soft_f32::f32_mul(0xFF800000, 0x3F800000), 0xFF800000);
+        // -Inf x 1 = -Inf
+        assert_eq!(crate::soft_f32::f32_mul(0xFF800000, 0x3F800000), 0xFF800000);
 
-        // FIXME: -Inf x Inf = -Inf
-        // 7FC00000
-        // assert_eq!(crate::soft_f32::f32_mul(0xFF800000, 0x7F800000), 0xFF800000);
+        // -Inf x Inf = -Inf
+        assert_eq!(crate::soft_f32::f32_mul(0xFF800000, 0x7F800000), 0xFF800000);
 
         // Inf x -1 = -Inf
         assert_eq!(crate::soft_f32::f32_mul(0x7F800000, 0xBF800000), 0xFF800000);
 
-        // FIXME: -Inf x -1 = -Inf
-        // BFC00000
-        // assert_eq!(crate::soft_f32::f32_mul(0xFF800000, 0xBF800000), 0x7F800000);
+        // -Inf x -1 = Inf
+        assert_eq!(crate::soft_f32::f32_mul(0xFF800000, 0xBF800000), 0x7F800000);
 
         // NaN x 1 = NaN
         assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_mul(0xFFFFFFFF, 0x3F800000)), true);
