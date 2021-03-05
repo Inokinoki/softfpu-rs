@@ -200,4 +200,14 @@ mod tests {
         assert_eq!(v0_1 > v0_1, false);
         assert_eq!(v0_1 >= v0_1, true);
     }
+
+    #[test]
+    fn test_f32_sqrt_with_struct() {
+        // sqrt(0.01) = 0.1
+        let v0_01 = crate::soft_f32::F32::from_u32(0x3C23D70A);
+
+        let v0_1 = v0_01.sqrt();
+
+        assert_eq!(v0_1.value(), 0x3DCCCCCD);
+    }
 }
