@@ -58,8 +58,6 @@ pub fn f32_sub(a: u32, b: u32) -> u32 {
             // Same, will cause a 0
             return f32_pack(0, 0, 0);
         }
-        assert_eq!(r_sign, 0);
-        assert_eq!(r_exp, 0x8F);
         return f32_norm_round_and_pack(r_sign, r_exp - 1, r_frac);
     } else if diff_exp > 0 {
         // Exp of A is greater
