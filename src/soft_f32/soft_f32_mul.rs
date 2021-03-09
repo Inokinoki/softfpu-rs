@@ -73,8 +73,8 @@ pub fn f32_mul(a: u32, b: u32) -> u32 {
         }
 
         let (exp, frac) = f32_norm_subnormal_frac(b_frac);
-        a_exp = exp;
-        a_frac = frac;
+        b_exp = exp;
+        b_frac = frac;
     }
 
     r_exp = a_exp + b_exp - 0x7F;
@@ -103,7 +103,7 @@ mod tests {
     fn test_f32_mul() {
         // 0.1 x 0.2 = 0.02
         assert_eq!(crate::soft_f32::f32_mul(0x3DCCCCCD, 0x3E4CCCCD), 0x3CA3D70B);
-        // -0.1 x -0.2 = -0.02
+        // -0.1 x -0.2 = 0.02
         assert_eq!(crate::soft_f32::f32_mul(0xBDCCCCCD, 0xBE4CCCCD), 0x3CA3D70B);
 
         // 12345 x 67890 = 8.381021E8
