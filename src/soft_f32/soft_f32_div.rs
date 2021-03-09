@@ -60,11 +60,11 @@ pub fn f32_div(a: u32, b: u32) -> u32 {
         }
 
         let (exp, frac) = f32_norm_subnormal_frac(b_frac);
-        a_exp = exp;
-        a_frac = frac;
+        b_exp = exp;
+        b_frac = frac;
     }
     if a_exp == 0 {
-        if a_sign == 0 {
+        if a_frac == 0 {
             // Zero
             return f32_pack_raw(r_sign, 0, 0);
         }
