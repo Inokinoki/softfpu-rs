@@ -5,6 +5,7 @@ mod soft_f32_mul;
 mod soft_f32_div;
 mod soft_f32_comp;
 mod soft_f32_sqrt;
+mod soft_f32_round;
 mod util;
 
 // Operations
@@ -23,6 +24,7 @@ use soft_f32_comp::f32_ge;
 
 // Others
 use soft_f32_sqrt::f32_sqrt;
+use soft_f32_round::f32_round;
 
 // Utilities
 pub use util::{
