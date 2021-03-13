@@ -6,6 +6,7 @@ use super::util::{
     f32_propagate_nan,
     f32_sign, f32_exp, f32_frac,
     f32_is_nan,
+    f32_count_leading_zero,
 };
 
 pub fn f32_round(a: u32) -> u32 {
@@ -46,6 +47,36 @@ pub fn f32_round(a: u32) -> u32 {
     }
     r &= (!round_bits_mask);
     return r;
+}
+
+pub fn from_int32(a: i32) -> u32 {
+    /*
+    1. Convert the int representation into a sign and a positive binary number
+    2. Convert the positive binary number to a fixed point representation
+        where the integral part = 1.xxxxx
+        (This step uses shift operations - you shift the decimal point to the left
+        until you find the most significant 1 bit in the binary number)
+        Let M be the mantissa with the leading 1 bit omitted
+        Let E be the exponent of the fixed point representation
+    3. Express the exponent E in  excess 127  code
+    4. Assemble:
+          Sign Exponent Mantissa     into  a IEEE 754 respresentation 
+    */
+    if (a == 0) {
+        return 0;
+    }
+
+    let frac: i32;
+    if (a < 0) {
+        frac = (!a) + 1;
+    } else {
+        frac = a;
+    }
+    let leading_zero = f32_count_leading_zero(frac);
+    let shift = (32 - leading_zero - 1);
+    let exp = shift + 0x7F;
+    let sign = if (a < 0) { 1 } else { 0 };
+    f32_pack(sign, exp, (frac << (24 - shift - 1)) & 0x7fffff)
 }
 
 // TODO: Add more convertors
@@ -102,5 +133,29 @@ mod tests {
         assert_eq!(crate::soft_f32::f32_round(0x3C23D70A), 0x00000000);
         // round(4) = 4
         assert_eq!(crate::soft_f32::f32_round(0x40800000), 0x40800000);
+    }
+
+    #[test]
+    fn test_i32_to_f32() {
+        // from_int32(0) = 0.0        
+        assert_eq!(crate::soft_f32::soft_f32_round::from_int32(0), 0x0);
+
+        // from_int32(4) = 4.0
+        assert_eq!(crate::soft_f32::soft_f32_round::from_int32(4), 0x40800000);
+
+        // from_int32(-4) = -4.0
+        assert_eq!(crate::soft_f32::soft_f32_round::from_int32(-4), 0xC0800000);
+
+        // from_int32(80235) = 0x479CB580
+        assert_eq!(crate::soft_f32::soft_f32_round::from_int32(80235), 0x479CB580);
+
+        // from_int32(80235) = 0x479CB580
+        assert_eq!(crate::soft_f32::soft_f32_round::from_int32(-80235), 0xC79CB580);
+
+        // FIXME: from_int32(2147483647) =  0x4f000000
+        // assert_eq!(crate::soft_f32::soft_f32_round::from_int32(std::i32::MAX), 0x4F000000);
+
+        // FIXME: from_int32(-2147483648) = 0xcf000000
+        // assert_eq!(crate::soft_f32::soft_f32_round::from_int32(std::i32::MIN), 0xCF000000);
     }
 }
