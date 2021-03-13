@@ -98,29 +98,22 @@ pub fn to_int32(a: u32) -> i32 {
             return 0;
         }
 
-        let sign = f32_sign(p);
-        let exp = f32_exp(p);
-        let frac = f32_frac(p);
+        let sign = f32_sign(a);
+        let exp = f32_exp(a);
+        let mut frac = f32_frac(a);
 
-        if (exp < 64 - 2) {
-            r = (frac >> (64 - 2 - exp));
-        } else if (exp + 2 - 64 < 2) {
-            r = (frac << (exp - (64 - 2)));
-        } else {
-            r = std::i32::MAX;
+        frac |= 0x800000;
+
+        if (exp < 0x7F) {
+            // It must be a zero, because it is too tiny
+            return 0;
         }
 
-        if (sign != 0) {
-            r = -r;
-            if (r < std::i32::MIN) {
-                return std::i32::MIN;
-            }
-            return r;
+        let shift = exp - 0x7F;
+        if (sign == 0) {
+            return frac >> (23 - shift);
         } else {
-            if (r <= std::i32::MAX) {
-                return r;
-            }
-            return std::i32::MAX;
+            return -!((frac >> (23 - shift)) - 1);
         }
     }
 }
@@ -133,6 +126,23 @@ mod tests {
         assert_eq!(crate::soft_f32::f32_round(0x3C23D70A), 0x00000000);
         // round(4) = 4
         assert_eq!(crate::soft_f32::f32_round(0x40800000), 0x40800000);
+    }
+
+    #[test]
+    fn test_f32_to_i32() {
+        // round(0.01) = 0
+        assert_eq!(crate::soft_f32::soft_f32_round::to_int32(0x3C23D70A), 0);
+        // round(4) = 4
+        assert_eq!(crate::soft_f32::soft_f32_round::to_int32(0x40800000), 4);
+        // round(244.5) = 244
+        assert_eq!(crate::soft_f32::soft_f32_round::to_int32(0x43748000), 244);
+        // round(128.2) = 128
+        assert_eq!(crate::soft_f32::soft_f32_round::to_int32(0x43003333), 128);
+
+        // FIXME: round(0x4f000000) = 2147483647)
+        // assert_eq!(crate::soft_f32::soft_f32_round::to_int32(0x4F000000), std::i32::MAX);
+        // FIXME: round(0xcf000000) = -2147483648)
+        // assert_eq!(crate::soft_f32::soft_f32_round::to_int32(0xCF000000), std::i32::MIN);
     }
 
     #[test]
