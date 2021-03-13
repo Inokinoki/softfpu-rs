@@ -5,6 +5,7 @@ use super::util::{
     f32_pack_raw, f32_pack,
     f32_propagate_nan,
     f32_sign, f32_exp, f32_frac,
+    f32_is_nan,
 };
 
 pub fn f32_round(a: u32) -> u32 {
@@ -45,6 +46,52 @@ pub fn f32_round(a: u32) -> u32 {
     }
     r &= (!round_bits_mask);
     return r;
+}
+
+// TODO: Add more convertors
+pub fn to_int32(a: u32) -> i32 {
+    let p = f32_round(a);
+    let mut r: i32 = 0;
+
+    if (f32_is_nan(p)) {
+        return std::i32::MAX;
+    } else if (p == 0x7F800000 || p == 0xFF800000) {
+        // Infinity
+        if (f32_sign(p) != 0) {
+            return std::i32::MIN;
+        }
+        return std::i32::MAX;
+    } else {
+        if (p == 0 || p == 0x80000000) {
+            // +- 0
+            return 0;
+        }
+
+        let sign = f32_sign(p);
+        let exp = f32_exp(p);
+        let frac = f32_frac(p);
+
+        if (exp < 64 - 2) {
+            r = (frac >> (64 - 2 - exp));
+        } else if (exp + 2 - 64 < 2) {
+            r = (frac << (exp - (64 - 2)));
+        } else {
+            r = std::i32::MAX;
+        }
+
+        if (sign != 0) {
+            r = -r;
+            if (r < std::i32::MIN) {
+                return std::i32::MIN;
+            }
+            return r;
+        } else {
+            if (r <= std::i32::MAX) {
+                return r;
+            }
+            return std::i32::MAX;
+        }
+    }
 }
 
 #[cfg(test)]
