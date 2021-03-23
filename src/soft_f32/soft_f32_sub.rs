@@ -114,6 +114,10 @@ pub fn f32_sub(a: u32, b: u32) -> u32 {
 
 #[cfg(test)]
 mod tests {
+    use super::f32_sub;
+    use crate::soft_f32::test_util::*;
+    use crate::soft_f32::f32_is_nan;
+
     #[test]
     fn test_f32_sub() {
         // 0.3 - 0.2 = 0.1
@@ -127,5 +131,34 @@ mod tests {
 
         // 0.004 - 0.004 = 0
         assert_eq!(crate::soft_f32::f32_sub(0x3B83126F, 0x3B83126F), 0x00000000);
+    }
+
+    #[test]
+    fn test_f32_sub_overflow() {
+        // -3.4028235E38 - 1.701412E38 = -Inf
+        assert_eq!(crate::soft_f32::f32_sub(0xFF7FFFFF, 0x7F000001), 0xFF800000);
+    }
+
+    #[test]
+    fn test_f32_sub_inf_nan() {
+        // Inf - ±1 = Inf
+        assert_eq!(f32_sub(INF, ONE), INF);
+        assert_eq!(f32_sub(INF, NEG_ONE), INF);
+
+        // -Inf - ±1 = -Inf
+        assert_eq!(f32_sub(NEG_INF, ONE), NEG_INF);
+        assert_eq!(f32_sub(NEG_INF, NEG_ONE), NEG_INF);
+
+        // ±Inf - ±Inf = NaN
+        assert!(f32_is_nan(f32_sub(INF, INF)));
+        assert!(f32_is_nan(f32_sub(NEG_INF, NEG_INF)));
+
+        // Inf - -Inf = Inf
+        assert_eq!(f32_sub(INF, NEG_INF), INF);
+
+        // -Inf - Inf = -Inf
+        assert_eq!(f32_sub(NEG_INF, INF), NEG_INF);
+
+        crate::soft_f32::test_util::test_nan(crate::soft_f32::f32_sub);
     }
 }

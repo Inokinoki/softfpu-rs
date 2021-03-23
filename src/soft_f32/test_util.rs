@@ -11,7 +11,7 @@ pub fn test_nan<F>(f: F)
 
     // NaN `f` ± 1 = NaN
     assert!(f32_is_nan(f(0xFFFFFFFF, ONE)));
-    assert!(f32_is_nan(f(0xFFFFFFFF, NEG_ONE)));
+    assert!(f32_is_nan(f(0xFFFFFFFF, NEG_ONE)));        // Shall I use NEG_ONE here?
 
     // NaN `f` ± INF = NaN
     assert!(f32_is_nan(f(0xFFFFFFFF, INF)));
