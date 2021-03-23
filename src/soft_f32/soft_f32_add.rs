@@ -149,6 +149,9 @@ mod tests {
         
         // 3.4028235E38 + 1.701412E38 = Inf
         assert_eq!(crate::soft_f32::f32_add(0x7F7FFFFF, 0x7F000001), 0x7F800000);       // PANIC!
+
+        // -3.4028235E38 + -1.701412E38 = -Inf
+        assert_eq!(crate::soft_f32::f32_add(0xFF7FFFFF, 0xFF000001), 0xFF800000);       // PANIC!
     }
 
     #[test]
@@ -170,18 +173,6 @@ mod tests {
 
         // common tests about NaN
         crate::soft_f32::test_util::test_nan(super::f32_add);
-
-        // NaN + 1 = NaN
-        assert_eq!(crate::soft_f32::f32_add(0xFFFFFFFF, 0x3F800000), 0xFFFFFFFF);
-
-        // NaN + -1 = NaN
-        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_add(0xFFFFFFFF, 0x3F800000)), true);        // what is it? 1 == -1?
-
-        // NaN + Inf = NaN
-        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_add(0xFFFFFFFF, 0x7F800000)), true);        // why not use assert!()
-
-        // NaN + -Inf = NaN
-        assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_add(0xFFFFFFFF, 0xFF800000)), true);
     }
 }
 
