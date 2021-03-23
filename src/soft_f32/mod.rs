@@ -7,6 +7,7 @@ mod soft_f32_comp;
 mod soft_f32_sqrt;
 mod soft_f32_round;
 mod util;
+mod test_util;
 
 // Operations
 use soft_f32_add::f32_add;
