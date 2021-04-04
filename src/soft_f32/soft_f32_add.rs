@@ -176,6 +176,12 @@ mod tests {
 
         // NaN + -Inf = NaN
         assert_eq!(crate::soft_f32::f32_is_nan(crate::soft_f32::f32_add(0xFFFFFFFF, 0xFF800000)), true);
+
+        assert_eq!(crate::soft_f32::f32_add(0x0, 0xBDCCCCCE), 0xBDCCCCCE);
+        assert_eq!(crate::soft_f32::f32_add(0x0, 0x3DCCCCCE), 0x3DCCCCCE);
+        assert_eq!(crate::soft_f32::f32_add(0x80000000, 0xBDCCCCCE), 0xBDCCCCCE);
+        assert_eq!(crate::soft_f32::f32_add(0x0, 0x0), 0x0);
+        assert_eq!(crate::soft_f32::f32_add(0x0, 0x80000000), 0x0);
     }
 }
 
