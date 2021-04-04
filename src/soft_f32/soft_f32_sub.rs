@@ -127,5 +127,11 @@ mod tests {
 
         // 0.004 - 0.004 = 0
         assert_eq!(crate::soft_f32::f32_sub(0x3B83126F, 0x3B83126F), 0x00000000);
+
+        // FIXME
+        // assert_eq!(crate::soft_f32::f32_sub(0x0, 0xBDCCCCCE), 0x3DCCCCCE);
+        assert_eq!(crate::soft_f32::f32_sub(0x0, 0x3DCCCCCE), 0xBDCCCCCE);
+        assert_eq!(crate::soft_f32::f32_sub(0x0, 0x0), 0x0);
+        assert_eq!(crate::soft_f32::f32_sub(0x0, 0x80000000), 0x0);
     }
 }
