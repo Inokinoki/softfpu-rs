@@ -4,10 +4,117 @@ use super::util::{
     f32_round_and_pack,
     f32_pack_raw, f32_pack,
     f32_propagate_nan,
+    f32_count_leading_zero,
     f32_sign, f32_exp, f32_frac,
 };
 
 pub fn f32_sub(a: u32, b: u32) -> u32 {
+    // Sign
+    let mut a_sign = f32_sign(a);
+    let mut b_sign = f32_sign(b);
+    let mut r_sign = a_sign;
+
+    // Exp
+    let mut a_exp = f32_exp(a);
+    let mut b_exp = f32_exp(b);
+    let mut r_exp = 0;
+
+    // Frac
+    let mut a_frac = f32_frac(a);
+    let mut b_frac = f32_frac(b);
+    let mut r_frac = 0;
+
+    let diff_exp = a_exp - b_exp;
+
+    if diff_exp == 0 {
+        if a_exp == 0xFF {
+            if (a_sign | b_sign) != 0 {
+                // Propagate NaN
+                return f32_propagate_nan(a, b);
+            } else {
+                // Return a NaN
+                // FIXME: 0x7FC00000 is used in IBM IEEE, while 0xFFC00000 is used otherwise
+                return f32_pack_raw(0, 0xFF, 0);
+            }
+        }
+        let mut sig_diff = a_frac - b_frac;
+        if sig_diff == 0 {
+            return f32_pack_raw(0, 0, 0);
+        }
+
+        if a_exp != 0 {
+            a_exp -= 1;
+        }
+
+        if sig_diff < 0 {
+            r_sign = !r_sign;
+            sig_diff = -sig_diff;
+        }
+        let mut shift_dist = f32_count_leading_zero(sig_diff) - 8;
+        r_exp = a_exp - shift_dist;
+        if r_exp < 0 {
+            shift_dist = a_exp;
+            r_exp = 0;
+        }
+        r_frac = (sig_diff << shift_dist);
+        return f32_pack_raw(r_sign, r_exp, r_frac);
+    } else {
+        return f32_sub_3a(a, b);
+        /*
+        a_frac <<= 7;
+        b_frac <<= 7;
+
+        if diff_exp < 0 {
+            r_sign = !r_sign;
+            if b_exp == 0xFF {
+                if b_frac != 0 {
+                    // Propagate NaN
+                    return f32_propagate_nan(a, b);
+                } else {
+                    // Return a NaN
+                    return f32_pack_raw(r_sign, 0xFF, 0);
+                }
+            }
+            r_exp = b_exp - 1;
+            let x_frac = (b_frac | 0x40000000);
+            let y_frac = (a_frac +
+                if (a_exp != 0) {
+                    0x40000000
+                } else {
+                    a_frac
+                }
+            );
+            return f32_norm_round_and_pack(
+                r_sign, r_exp, x_frac - f32_shift_right_jam(y_frac, -diff_exp)
+            );
+        } else {
+            if a_exp == 0xFF {
+                if a_frac != 0 {
+                    // Propagate NaN
+                    return f32_propagate_nan(a, b);
+                } else {
+                    // Return a NaN
+                    return f32_pack_raw(r_sign, 0xFF, 0);
+                }
+            }
+            r_exp = a_exp - 1;
+            let x_frac = (a_frac | 0x40000000);
+            let y_frac = (b_frac +
+                if (b_exp != 0) {
+                    0x40000000
+                } else {
+                    b_frac
+                }
+            );
+            return f32_norm_round_and_pack(
+                r_sign, r_exp, x_frac - f32_shift_right_jam(y_frac, diff_exp)
+            );
+        }
+        */
+    }
+}
+
+pub fn f32_sub_3a(a: u32, b: u32) -> u32 {
     // Sign
     let mut a_sign = f32_sign(a);
     let mut b_sign = f32_sign(b);
