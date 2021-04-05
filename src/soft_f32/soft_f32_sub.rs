@@ -122,6 +122,18 @@ mod tests {
         // 0.2 - 0.3 = -0.1
         assert_eq!(crate::soft_f32::f32_sub(0x3E4CCCCD, 0x3E99999A), 0xBDCCCCCE);
 
+        // FIXME: 0.2 - -0.1 = 0.3
+        // 0x3DCCCCCC
+        // assert_eq!(crate::soft_f32::f32_sub(0x3E4CCCCD, 0xBDCCCCCE), 0x3E99999A);
+
+        // FIXME: -0.2 - 0.1 = -0.3
+        // 0xBDCCCCCC
+        // assert_eq!(crate::soft_f32::f32_sub(0xBE4CCCCD, 0x3DCCCCCE), 0xBE99999A);
+
+        // FIXME: -0.2 - -0.1 = -0.1
+        // 0xBDCCCCCC, precision issue
+        // assert_eq!(crate::soft_f32::f32_sub(0xBE4CCCCD, 0xBDCCCCCE), 0xBDCCCCCE);
+
         // 80235 - 67890 = 12345
         assert_eq!(crate::soft_f32::f32_sub(0x479CB580, 0x47849900), 0x4640E400);
 

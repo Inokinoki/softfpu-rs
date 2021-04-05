@@ -182,6 +182,11 @@ mod tests {
         assert_eq!(crate::soft_f32::f32_add(0x80000000, 0xBDCCCCCE), 0xBDCCCCCE);
         assert_eq!(crate::soft_f32::f32_add(0x0, 0x0), 0x0);
         assert_eq!(crate::soft_f32::f32_add(0x0, 0x80000000), 0x0);
+
+        // FIXME: 0x8DEB8000
+        // assert_eq!(crate::soft_f32::f32_add(0x3FFD70A4, 0xC0000000), 0xBCA45700);
+        // FIXME: 0x8DEB8000
+        // assert_eq!(crate::soft_f32::f32_add(0x400147AE, 0xC0000000), 0x3CA45700);
     }
 }
 
